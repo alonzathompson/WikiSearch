@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 
-  <title>React Multiple Todo</title>
+  <title>Wiki Search</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="keywords" content="reactjs, react todo, multiple list maker">
+  <meta name="keywords" content="wiki, Wiki Search, javascript, html">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The HTML5 Herald">
+  <meta name="description" content="Wiki Search">
   <meta name="author" content="Alonza Thompson">
 
+  <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" href="styles.css">
 
@@ -17,18 +18,83 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
   <![endif]-->
 </head>
+  <body>
+    <div id="app">
+      <h1 id="title">WikiSearch</h1>
+      <form id="wikiSearch">
+        <input type="text" id="search" name="name">
+        <input type="button" value="submit" id="smt" >
+      </form>
+      <div id="results-container">
+        <div id="results"></div>
+        <ul id="results-list"></ul>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
+    <script type="text/babel">
+    (function(){
+    //const term = grabEl("searchInput").value;
 
-<body>
-<div id="app">
-  <h1 id="title">WikiSearch</h1>
-  <form id="wikiSearch">
-    <input type="text" id="search" name="name">
-    <input type="button" value="submit" id="smt" >
-  </form>
-  <div id="results-container">
-    <div id="results"></div>
-    <ul id="results-list"></ul>
-  </div>
-</div>
-</body>
+    const grabEl = (id)=>{
+     return document.getElementById(id);
+    }
+
+    class SearchData {
+        constructor(url){
+          this.url = url;
+          window.document.getElementById('smt').addEventListener('click', (e) => {
+            e.preventDefault();
+
+            this.handleClick();
+          });
+        }
+
+        getSearchInput(){
+          return document.getElementById('search').value;
+        }
+
+        getSearchData(){
+          const results = grabEl('results');
+          const resultsL = grabEl('results-list');
+          let s = grabEl('search');
+          let term = this.getSearchInput();
+          let _html = resultsL.innerHTML;
+
+          axios.get(this.url + term + '&format=json')
+            .then( (response) =>{
+              const dataB1 = response.data[1];
+              const dataB2 = response.data[2];
+              const dataB3 = response.data[3];
+
+              results.innerHTML = 'results for <h1>' + response.data[0] + '</h1>';
+              resultsL.innerHTML = "";
+
+            for(var i = 0; i < dataB1.length; i++){
+                let eChild = document.createElement("li");
+                eChild.innerHTML = "<li><h3>" + dataB1[i] + "</h3>"
+                + dataB2[i] + "</br><a href=" + dataB3[i] + "></br>"
+                +"<i>more on</i>" + " " +dataB1[i] + "</a>" + "</li>"
+
+                resultsL.append(eChild);
+              }
+              //s.reset();
+          }).catch( (error) => {
+              console.log(error.response);
+          })
+
+        }
+
+        handleClick(){
+         //let s = grabEl('search');
+         this.getSearchData();
+
+        }
+
+    }
+    const wikiURL = 'https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=';
+    const wikiSearch = new SearchData(wikiURL);
+     })();
+    </script>
+  </body>
 </html>
