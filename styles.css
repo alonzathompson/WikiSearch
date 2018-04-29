@@ -126,11 +126,16 @@ input[type="text"]:active {
   color: white;
   cursor: pointer;
   margin: 32px auto;
-  transition: text-shadow 5s ease-in;
+  transition: text-shadow .5s ease-in;
 }
 
 .hide:hover{
   text-shadow: 1px 8px rgba(0,0,0,0.5);
+}
+
+.hide:active{
+  transform: translateY(5px);
+  text-shadow: 0px 1px rgba(0,0,0,0.5);
 }
 
 #results-container{
