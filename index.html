@@ -45,100 +45,105 @@
     <script type="text/babel">
     (function(){
   
-//const term = grabEl("searchInput").value;
-const grabEl = (id)=>{
- return document.getElementById(id);
-}
-
-class SearchData {
-    constructor(url){
-      this.url = url;
-      this.offset = 0;
-      window.document.getElementById('smt').addEventListener('click', (e) => {
-        e.preventDefault();
-        this.handleSearch();
-      });
-      
-      window.document.getElementById('next').addEventListener('click', (e) => {
-        e.preventDefault();
-        this.showNext();
-      });
-      
-      window.document.getElementById('prev').addEventListener('click', (e) => {
-        e.preventDefault();
-        this.showPrev();
-      });
-      
-     window.document.getElementById('search').addEventListener('keypress', (e) => {
-        
-       if(e.keyCode === 13){
-         e.preventDefault();
-         this.handleSearch();
-       }
-      });
-    }
-  
-    getSearchInput(){
-      return document.getElementById('search').value;
-    }
-      
-    getSearchData(newOffset){
-      const results = grabEl('results');
-      const resultsL = grabEl('results-list');
-      let s = grabEl('search');
-      let term = this.getSearchInput();
-      
-      if(term === null || term === undefined || term === ""){
-        grabEl('next').style.display = "";
-        grabEl('prev').style.display = "";
-        grabEl('results').innerHTML = "";
-        resultsL.innerHTML = "<h3>you have not entered anything</h3>";
-      } else {
-      
-        axios.get(this.url + term + '&format=json&sroffset=' + (this.offset += newOffset))
-          .then( (response) => {          
-
-            const dataB1 = response.data.query.search;
-            results.innerHTML = 'results for <h1>' + term + '</h1>';
-            resultsL.innerHTML = "";
-
-          for(var i = 0; i < dataB1.length; i++){
-              let eChild = document.createElement("li");
-              eChild.innerHTML = "<li><h3 class='title'>" + dataB1[i].title + "</h3>" 
-              + "<p class='snippet'>" + dataB1[i].snippet + "</p>" + "</br><a href=https://en.wikipedia.org/wiki/" +                                 dataB1[i].title.replace(/ /g,"_") + "  target='_blank'></br>"
-              +"<i>more on</i>" + " " + dataB1[i].title + "</a>" + "</li>"
-
-              resultsL.append(eChild);
-            }
-            //s.reset();   
-        }).catch( (error) => {
-            console.log(error.response);
-        })
+      //const term = grabEl("searchInput").value;
+      const grabEl = (id)=>{
+       return document.getElementById(id);
       }
-    }
-  
-    handleSearch(){  
-     grabEl('next').style.display = "block";
-     this.getSearchData(0);
-    }
-  
-    showNext(){
-      this.getSearchData(10);
-      grabEl('prev').style.display = "block";
-    }
-  
-    showPrev(){
-      this.getSearchData(-10);
-      if(this.offset <= 0){
-        this.offset = 0;
-        grabEl('prev').style.display = "";
-      }
-    }
-}
 
-const wikiURL = 'https://en.wikipedia.org/w/api.php?action=query&list=search&prop=links&origin=*&srsearch=';
-const wikiSearch = new SearchData(wikiURL); 
- })();
+       class SearchData {
+          constructor(url){
+          this.url = url;
+          this.offset = 0;
+          window.document.getElementById('smt').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.handleSearch();
+          });
+
+          window.document.getElementById('next').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showNext();
+          });
+
+          window.document.getElementById('prev').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showPrev();
+          });
+
+         window.document.getElementById('search').addEventListener('keypress', (e) => {
+
+           if(e.keyCode === 13){
+             e.preventDefault();
+             this.handleSearch();
+           }
+          });
+        }
+
+        getSearchInput(){
+          return document.getElementById('search').value;
+        }
+
+        handleGetRequest(){
+
+        }
+
+        getSearchData(newOffset){
+          const results = grabEl('results');
+          const resultsL = grabEl('results-list');
+          let s = grabEl('search');
+          let term = this.getSearchInput();
+
+          if(term === null || term === undefined || term === ""){
+            grabEl('next').style.display = "";
+            grabEl('prev').style.display = "";
+            grabEl('results').innerHTML = "";
+            resultsL.innerHTML = "<h3 style='font-size:2em;text-align:center; color:white'>You have typed absolutely nothing!</h3>";
+          } else {
+
+            axios.get(this.url + term + '&format=json&sroffset=' + (this.offset += newOffset))
+              .then( (response) => {          
+
+                const dataB1 = response.data.query.search;
+                console.log(this.offset);
+                results.innerHTML = 'results for <h1>' + term + '</h1>';
+                resultsL.innerHTML = "";
+
+              for(var i = 0; i < dataB1.length; i++){
+                  let eChild = document.createElement("li");
+                  eChild.innerHTML = "<li><h3 class='title'>" + dataB1[i].title + "</h3>" 
+                  + "<p class='snippet'>" + dataB1[i].snippet + "</p>" + "</br><a href=https://en.wikipedia.org/wiki/" +                                 dataB1[i].title.replace(/ /g,"_") + "  target='_blank'></br>"
+                  +"<i>more on</i>" + " " + dataB1[i].title + "</a>" + "</li>"
+
+                  resultsL.append(eChild);
+                }
+                //s.reset();   
+            }).catch( (error) => {
+                console.log(error.response);
+            })
+          }
+        }
+
+        handleSearch(){  
+         grabEl('next').style.display = "block";
+         this.getSearchData(0);
+        }
+
+        showNext(){
+          this.getSearchData(10);
+          grabEl('prev').style.display = "block";
+        }
+
+        showPrev(){
+          this.getSearchData(-10);
+          if(this.offset <= 0){
+            this.offset = 0;
+            grabEl('prev').style.display = "";
+          }
+        }
+    }
+
+    const wikiURL = 'https://en.wikipedia.org/w/api.php?action=query&list=search&prop=links&origin=*&srsearch=';
+    const wikiSearch = new SearchData(wikiURL); 
+     })();
     </script>
   </body>
 </html>
