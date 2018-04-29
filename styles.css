@@ -191,10 +191,6 @@ li:hover{
     color: rgba(192, 57, 43,1.0)
   }
   
-  li{
-    width: 97%;
-  }
-  
   .holder{
     flex-grow: 0;
     margin: 12px;
