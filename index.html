@@ -11,7 +11,7 @@
   <meta name="author" content="Alonza Thompson">
 
   <link href="https://fonts.googleapis.com/css?family=Lobster" rel="stylesheet">
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="styles.css">
 
   <!--[if lt IE 9]>
@@ -21,80 +21,124 @@
   <body>
     <div id="app">
       <h1 id="title">WikiSearch</h1>
-      <form id="wikiSearch">
+  
+      <form id="wikiSearch" class="wiki">
         <input type="text" id="search" name="name">
-        <input type="button" value="submit" id="smt" >
+        <input type="button" value="submit" id="smt" class="button">
       </form>
+  
       <div id="results-container">
         <div id="results"></div>
         <ul id="results-list"></ul>
       </div>
-    </div>
+   
+      <div id="counter" class="holder">
+        <i id="prev" class="fa fa-angle-left fa-5x hide" aria-hidden="true"></i>
+      </div>
+
+      <div id="counter2" class="holder">
+        <i id="next" class="fa fa-angle-right fa-5x hide" aria-hidden="true"></i>
+      </div>
+   </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
     <script type="text/babel">
     (function(){
-    //const term = grabEl("searchInput").value;
+  
+//const term = grabEl("searchInput").value;
+const grabEl = (id)=>{
+ return document.getElementById(id);
+}
 
-    const grabEl = (id)=>{
-     return document.getElementById(id);
+class SearchData {
+    constructor(url){
+      this.url = url;
+      this.offset = 0;
+      window.document.getElementById('smt').addEventListener('click', (e) => {
+        e.preventDefault();
+        this.handleSearch();
+      });
+      
+      window.document.getElementById('next').addEventListener('click', (e) => {
+        e.preventDefault();
+        this.showNext();
+      });
+      
+      window.document.getElementById('prev').addEventListener('click', (e) => {
+        e.preventDefault();
+        this.showPrev();
+      });
+      
+     window.document.getElementById('search').addEventListener('keypress', (e) => {
+        
+       if(e.keyCode === 13){
+         e.preventDefault();
+         this.handleSearch();
+       }
+      });
     }
-
-    class SearchData {
-        constructor(url){
-          this.url = url;
-          window.document.getElementById('smt').addEventListener('click', (e) => {
-            e.preventDefault();
-
-            this.handleClick();
-          });
-        }
-
-        getSearchInput(){
-          return document.getElementById('search').value;
-        }
-
-        getSearchData(){
-          const results = grabEl('results');
-          const resultsL = grabEl('results-list');
-          let s = grabEl('search');
-          let term = this.getSearchInput();
-          let _html = resultsL.innerHTML;
-
-          axios.get(this.url + term + '&format=json')
-            .then( (response) =>{
-              const dataB1 = response.data[1];
-              const dataB2 = response.data[2];
-              const dataB3 = response.data[3];
-
-              results.innerHTML = 'results for <h1>' + response.data[0] + '</h1>';
-              resultsL.innerHTML = "";
-
-            for(var i = 0; i < dataB1.length; i++){
-                let eChild = document.createElement("li");
-                eChild.innerHTML = "<li><h3>" + dataB1[i] + "</h3>"
-                + dataB2[i] + "</br><a href=" + dataB3[i] + "></br>"
-                +"<i>more on</i>" + " " +dataB1[i] + "</a>" + "</li>"
-
-                resultsL.append(eChild);
-              }
-              //s.reset();
-          }).catch( (error) => {
-              console.log(error.response);
-          })
-
-        }
-
-        handleClick(){
-         //let s = grabEl('search');
-         this.getSearchData();
-
-        }
-
+  
+    getSearchInput(){
+      return document.getElementById('search').value;
     }
-    const wikiURL = 'https://en.wikipedia.org/w/api.php?origin=*&action=opensearch&search=';
-    const wikiSearch = new SearchData(wikiURL);
-     })();
+      
+    getSearchData(newOffset){
+      const results = grabEl('results');
+      const resultsL = grabEl('results-list');
+      let s = grabEl('search');
+      let term = this.getSearchInput();
+      
+      if(term === null || term === undefined || term === ""){
+        grabEl('next').style.display = "";
+        grabEl('prev').style.display = "";
+        grabEl('results').innerHTML = "";
+        resultsL.innerHTML = "<h3>you have not entered anything</h3>";
+      } else {
+      
+        axios.get(this.url + term + '&format=json&sroffset=' + (this.offset += newOffset))
+          .then( (response) => {          
+
+            const dataB1 = response.data.query.search;
+            results.innerHTML = 'results for <h1>' + term + '</h1>';
+            resultsL.innerHTML = "";
+
+          for(var i = 0; i < dataB1.length; i++){
+              let eChild = document.createElement("li");
+              eChild.innerHTML = "<li><h3 class='title'>" + dataB1[i].title + "</h3>" 
+              + "<p class='snippet'>" + dataB1[i].snippet + "</p>" + "</br><a href=https://en.wikipedia.org/wiki/" +                                 dataB1[i].title.replace(/ /g,"_") + "  target='_blank'></br>"
+              +"<i>more on</i>" + " " + dataB1[i].title + "</a>" + "</li>"
+
+              resultsL.append(eChild);
+            }
+            //s.reset();   
+        }).catch( (error) => {
+            console.log(error.response);
+        })
+      }
+    }
+  
+    handleSearch(){  
+     grabEl('next').style.display = "block";
+     this.getSearchData(0);
+    }
+  
+    showNext(){
+      this.getSearchData(10);
+      grabEl('prev').style.display = "block";
+    }
+  
+    showPrev(){
+      this.getSearchData(-10);
+      if(this.offset <= 0){
+        this.offset = 0;
+        grabEl('prev').style.display = "";
+      }
+    }
+}
+
+const wikiURL = 'https://en.wikipedia.org/w/api.php?action=query&list=search&prop=links&origin=*&srsearch=';
+const wikiSearch = new SearchData(wikiURL); 
+ })();
     </script>
   </body>
 </html>
